@@ -19,15 +19,17 @@ class AddictiveEnv_v2(gym.Env):
         
         self.reward_healty = 1
         self.reward_addicted = 10
-        self.reward_penality = -50 
-        self.C_penality = -1.2 # reward stando fermo in aftereffects
+        self.reward_penality = -25
+        self.C_penality = -2 # reward stando fermo in aftereffects
+        
         
         
         self.observation_space = spaces.Discrete(self.numero_stati) # non uso stato 0 
         self.action_space = spaces.Discrete(self.numero_azioni)         
         self.state = self.S0
 
-        self.p = 0.1
+        self.p = 1
+        
         
         
         # env_phase: 0-50 safe -> addictive deactivated
@@ -74,8 +76,11 @@ class AddictiveEnv_v2(gym.Env):
             elif self.state == 4:
                 if action == 3:
                     sampleList = [self.state, self.S0] # con probabilità p << 1 il salto di stato, se no rimango dove sono 
-                    self.state = choice(sampleList, 1, p = [(1-self.p), self.p])[0]
-                    reward = self.reward_penality
+                    self.state = choice(sampleList, 1, p = [(1 - self.p), self.p])[0]
+                    if (self.state == self.S0):
+                        reward = self.reward_penality
+                    else:
+                        reward = self.C_penality 
                 else:
                     reward = self.C_penality   
                 
