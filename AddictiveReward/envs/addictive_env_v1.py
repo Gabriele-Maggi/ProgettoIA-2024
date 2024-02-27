@@ -33,7 +33,7 @@ class AddictiveEnv_v1(gym.Env):
 
     
         
-        self.AR = ["as2", "as3", "as4", "as5", "as6", "as7", "aG", "aW", "aD",]
+        self.AR = ["as2", "as3", "as4", "as5", "as6", "as7", "aG", "aW", "aD"]
         # ag -> 6
         # aw -> 7
         # ad -> 8
