@@ -33,7 +33,7 @@ class AddictiveEnv_v3(gym.Env):
         # env_phase: 0-50 safe -> addictive deactivated
         # env_phase: 50-1000 safe -> addictive activated
         self.env_phase = 0 
-        self.DINIT = 0
+        self.DINIT = 50
         self.DDRUG = 5000
 
         ############ Bandit ##############
@@ -44,9 +44,9 @@ class AddictiveEnv_v3(gym.Env):
         self.q_bandit = np.zeros(self.arms)
         
         self.t = 1 # aggiornato a ogni azione presa da agent
-        self.c = 2
+        self.c = 1.5
         self.current_arm = 0 # 0:4 1:2
-        self.non_addictive_reward = 2
+        self.non_addictive_reward = -1
         ##################################
         
     def get_iter(self):
@@ -115,6 +115,10 @@ class AddictiveEnv_v3(gym.Env):
                 elif self.current_arm == 1:
                     self.state = 2
                     reward = self.non_addictive_reward 
+            else:
+                self.reward_action[self.current_arm] -= 1
+                self._calculate_action()
+            
                 
         elif self.state == 4:
             if action == 3:
@@ -137,7 +141,15 @@ class AddictiveEnv_v3(gym.Env):
         pass
     
     def reset(self, seed: Optional[int] = None, options: Optional[dict] = None):
+        
         super().reset(seed=seed)
+
+        self.number_action = np.ones(self.arms)
+        self.reward_action = np.ones(self.arms)
+        self.q_bandit = np.zeros(self.arms)
+        
+        self.t = 1 # aggiornato a ogni azione presa da agent
+
         
         self.state = self.S0
         self.env_phase = 0 
