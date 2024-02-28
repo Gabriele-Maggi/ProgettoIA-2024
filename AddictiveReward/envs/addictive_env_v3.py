@@ -7,33 +7,9 @@ from numpy.random import choice
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from typing import Optional
+import math
 
-
-# from numba import njit, gdb_init
-# from numba import uint32, int32, int32, b1, float64, float32
-# from numba.experimental import jitclass
-
-# spec = [
-#     ("numero_stati", int32),
-#     ("numero_azioni", int32),
-#     ("S0", int32),
-#     ("reward_healty", int32),
-#     ("reward_addicted", int32),
-#     ("reward_penality", int32),
-#     ("C_penality", int32),
-    
-#     ("p", int32),
-    # ("env_phase", int32),
-#   ("DINIT", int32),
-#    ("DDRUG", int32),
-    
-#    ("reward_penality", int32),
-#]
-
-
-#@jitclass(spec)
-
-class AddictiveEnv_v2(gym.Env):
+class AddictiveEnv_v3(gym.Env):
     def __init__(self):
         
         self.numero_stati = 5 # 0:x 1:H 2:N 3:A 4:C
@@ -59,7 +35,19 @@ class AddictiveEnv_v2(gym.Env):
         self.env_phase = 0 
         self.DINIT = 0
         self.DDRUG = 5000
+
+        ############ Bandit ##############
+        self.arms = 2
+                
+        self.number_action = np.ones(self.arms)
+        self.reward_action = np.ones(self.arms)
+        self.q_bandit = np.zeros(self.arms)
         
+        self.t = 1 # aggiornato a ogni azione presa da agent
+        self.c = 2
+        self.current_arm = 0 # 0:4 1:2
+        self.non_addictive_reward = 2
+        ##################################
         
     def get_iter(self):
         return self.DINIT + self.DDRUG
@@ -67,6 +55,24 @@ class AddictiveEnv_v2(gym.Env):
     def _get_obs(self):
         return self.state
     
+    ## bandit method ##
+    def _calculate_rew(self):
+        for ar in range(self.arms):
+            self.q_bandit[ar] = self.reward_action[ar] / self.number_action[ar] 
+    
+    def _calculate_action(self):
+        self._calculate_rew()
+        
+        temp = np.zeros(self.arms)
+        for ar in range(self.arms):
+            temp[ar] = (self.q_bandit[ar] + (self.c * math.sqrt(math.log(self.t) / self.number_action[ar] )))
+        #print(f"{temp}")    
+        new_arm = np.argmax(temp)
+        if self.current_arm != new_arm:
+            self.t += 1
+        self.current_arm = new_arm
+                        
+        
     def step(self, action):
         
         if (self.env_phase < self.DINIT):
@@ -75,20 +81,8 @@ class AddictiveEnv_v2(gym.Env):
             self.action_space = spaces.Discrete(self.numero_azioni)
             
         reward = 0
-        # if (self.env_phase < self.DINIT):
-        #     if self.state == 1:
-        #         if action == 2:
-        #             self.state = self.S0
-        #             reward = self.reward_healty
-        #     elif self.state == 2:    
-        #         if action == 2:
-        #             self.state = 1
-        #         elif action == 1:
-        #             self.state = 3
-        #     elif self.state == 3:
-        #         if action == 0:
-        #             self.state = 2
-        # else:
+
+        
         if self.state == 1:
             if action == 2:
                 self.state = self.S0
@@ -98,12 +92,30 @@ class AddictiveEnv_v2(gym.Env):
                 self.state = 1
             elif action == 1:
                 self.state = 3
+        
         elif self.state == 3:
             if action == 0:
-                self.state = 2    
+                self.state = 2
+
+                self.reward_action[self.current_arm] -= 1
+                self._calculate_action()
+                
             elif action == 4:
-                self.state = 4
-                reward = self.reward_addicted                   
+                
+                self.reward_action[self.current_arm] += 1
+                self.number_action[self.current_arm] += 1
+                
+                self._calculate_action()
+                
+                #print(f"{self.reward_action}")
+                
+                if self.current_arm == 0:
+                    self.state = 4
+                    reward = self.reward_addicted       
+                elif self.current_arm == 1:
+                    self.state = 2
+                    reward = self.non_addictive_reward 
+                
         elif self.state == 4:
             if action == 3:
                 self.state = self.S0

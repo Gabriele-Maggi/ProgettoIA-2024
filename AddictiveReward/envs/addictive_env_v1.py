@@ -21,10 +21,10 @@ class AddictiveEnv_v1(gym.Env):
         self.RG = 1    # Reward 
         
         self.DINIT = 50  # Duration safe phase
-        self.DDRUG = 1000
+        self.DDRUG = 10000
 
-        self.pmm = 0.6
-        self.pm = 0.9
+        self.pmm = 0.2
+        self.pm = 0.6
         ## ACTIONS
         #as2-7 -> 0-5
         self.AG = 6
@@ -48,6 +48,9 @@ class AddictiveEnv_v1(gym.Env):
         self.env_phase = 0 
            
 
+    def get_iter(self):
+        return self.DINIT + self.DDRUG
+
     def _get_obs(self):
         return self.state
 
@@ -57,109 +60,82 @@ class AddictiveEnv_v1(gym.Env):
         info = {}
         # safe phase
         if (self.env_phase < self.DINIT):
-            # muovo 2-7 p=1 su adiacenti e p << 1 su lontani
-                              
-            if (action == 6 and self.state == 2):
-                info = "sf mi muovo da " + str(self.state) + " a healty" + " action: " + self.AR[action] + " 3"
-                self.state = 1
-                reward = 0
-                
-            elif (action == 6 and self.state == 1):
-                self.state = self.S0
-                info = "sf mi muovo da " + "healty" + " a " + str(self.S0) + " action: " + self.AR[action] + " 4"
-                reward = self.RG
-                
-            elif (action < 6 and self.state != 1): # movimenti tra stati neutrali 2-7
-                
-                if (self.state - 1 <= action + 2 <= self.state + 1):
-                    info = "sf mi muovo da " + str(self.state) + " a " + str(action + 2) + " action: " + self.AR[action] + " 1"
+            self.action_space = spaces.Discrete(self.NA - 1)
+        else:
+            self.action_space = spaces.Discrete(self.NA)
+
+        
+        if (self.state < 8):
+            if (action < 6 and self.state != 1):
+                 if (self.state - 1 <= action + 2 <= self.state + 1):
+                    info = "mi muovo da " + str(self.state) + " a " + str(action + 2)+ " action: " + self.AR[action] + " 6"
                     self.state = action + 2
                     reward = 0
-                    
-                else:
+                     
+                 else:
                     s = str(self.state)
                     sampleList = [self.state, action + 2] # con probabilità p << 1 il salto di stato, se no rimango dove sono 
                     self.state = choice(sampleList, 1, p = [(1-self.pmm), self.pmm])[0]
-                    info = "sf mi muovo da " + s + " a " + str(self.state)+ " action: " + self.AR[action] + " 2"
+                    info = "mi muovo da " + s + " a " + str(self.state)+ " action: " + self.AR[action] + " 7"
                     reward = 0
-            
+                     
+            elif (action == 6 and self.state == 2):
+                info = "mi muovo da " + str(self.state) + " a healty" + " action: " + self.AR[action] + " 8"
+                self.state = 1
+                reward = 0
+                
+            elif (action == 6 and self.state == 1): # stato sano
+                info = "mi muovo da " + "healty" + " a " + str(self.S0) + " action: " + self.AR[action] + " 9"
+                self.state = self.S0
+                reward = self.RG
+                
+            elif (action == self.AD and self.state == 7): # stato dipendenza
+                self.state = 8
+                info = "addicted"+ " action: " + self.AR[action] + " 10"
+                reward = self.RDD
+                
             else:
                 self.state = self.state
-                info = "sf non mi muovo da " + str(self.state) + " 5"
+                info = "non mi muovo da " + str(self.state) + " 11"
                 reward = 0
-        # rest of the phases
-        else:
-            if (self.state < 8):
-                if (action < 6 and self.state != 1):
-                     if (self.state - 1 <= action + 2 <= self.state + 1):
-                        info = "mi muovo da " + str(self.state) + " a " + str(action + 2)+ " action: " + self.AR[action] + " 6"
-                        self.state = action + 2
-                        reward = 0
-                         
-                     else:
-                        s = str(self.state)
-                        sampleList = [self.state, action + 2] # con probabilità p << 1 il salto di stato, se no rimango dove sono 
-                        self.state = choice(sampleList, 1, p = [(1-self.pmm), self.pmm])[0]
-                        info = "mi muovo da " + s + " a " + str(self.state)+ " action: " + self.AR[action] + " 7"
-                        reward = 0
-                         
-                elif (action == 6 and self.state == 2):
-                    info = "mi muovo da " + str(self.state) + " a healty" + " action: " + self.AR[action] + " 8"
-                    self.state = 1
-                    reward = 0
-                    
-                elif (action == 6 and self.state == 1): # stato sano
-                    info = "mi muovo da " + "healty" + " a " + str(self.S0) + " action: " + self.AR[action] + " 9"
-                    self.state = self.S0
-                    reward = self.RG
-                    
-                elif (action == self.AD and self.state == 7): # stato dipendenza
-                    self.state = 8
-                    info = "addicted"+ " action: " + self.AR[action] + " 10"
-                    reward = self.RDD
-                    
-                else:
-                    self.state = self.state
-                    info = "non mi muovo da " + str(self.state) + " 11"
-                    reward = 0
-                    
-            elif (self.state >= 8 and self.state <= 22): # stati di after effects
-                if (self.state == 20 and (action == self.AW or action == self.AD)):
+                
+        elif (self.state >= 8 and self.state <= 22): # stati di after effects
+            if (self.state == 20 and (action == self.AW or action == self.AD)):
+                s = str(self.state)
+                sampleList = [self.state, self.S0] # con probabilità p << 1 il salto di stato, se no rimango dove sono 
+                self.state = choice(sampleList, 1, p = [(1-self.pmm), self.pmm])[0]
+                info = "mi muovo da " + s + " a " + str(self.state) + " action: " + self.AR[action] + " 12"
+                reward = self.RP
+                
+            elif (self.state == 15 and action == self.AW):
+                s = str(self.state)
+                sampleList = [self.state, self.S0] # con probabilità p < 1 il salto di stato, se no rimango dove sono 
+                self.state = choice(sampleList, 1, p = [(1-self.pm), self.pm])[0]
+                info = "mi muovo da " + s + " a " + str(self.state) + " action: " + self.AR[action] + " 13"
+                reward = self.RP
+                
+            elif (action == self.AW or action == self.AD):
+                if (self.state != 8 and self.state != 22):
                     s = str(self.state)
-                    sampleList = [self.state, self.S0] # con probabilità p << 1 il salto di stato, se no rimango dove sono 
-                    self.state = choice(sampleList, 1, p = [(1-self.pmm), self.pmm])[0]
-                    info = "mi muovo da " + s + " a " + str(self.state) + " action: " + self.AR[action] + " 12"
-                    reward = self.RP
-                    
-                elif (self.state == 15 and action == self.AW):
+                    sampleList = [self.state, self.state - 1, self.state + 1] # con probabilità p < 1 il salto di stato, se no rimango dove sono 
+                    self.state = choice(sampleList, 1, p = [(1 - (self.pm)), self.pm/2, self.pm/2])[0]
+                    info = "mi muovo da " + s + " a " + str(self.state) + " action: " + self.AR[action] + " 14"
+                    reward = self.RC
+                elif (self.state == 8):
                     s = str(self.state)
-                    sampleList = [self.state, self.S0] # con probabilità p < 1 il salto di stato, se no rimango dove sono 
-                    self.state = choice(sampleList, 1, p = [(1-self.pm), self.pm])[0]
-                    info = "mi muovo da " + s + " a " + str(self.state) + " action: " + self.AR[action] + " 13"
-                    reward = self.RP
-                    
-                elif (action == self.AW or action == self.AD):
-                    if (self.state != 8 and self.state != 22):
-                        s = str(self.state)
-                        sampleList = [self.state, self.state - 1, self.state + 1] # con probabilità p < 1 il salto di stato, se no rimango dove sono 
-                        self.state = choice(sampleList, 1, p = [(1 - (self.pm)), self.pm/2, self.pm/2])[0]
-                        info = "mi muovo da " + s + " a " + str(self.state) + " action: " + self.AR[action] + " 14"
-                        reward = self.RC
-                    elif (self.state == 8):
-                        s = str(self.state)
-                        sampleList = [self.state, self.NT - 1, self.state + 1] # con probabilità p < 1 il salto di stato, se no rimango dove sono 
-                        self.state = choice(sampleList, 1, p = [(1 - (self.pm)), self.pm/2, self.pm/2])[0]
-                        info = "mi muovo da " + s + " a " + str(self.state) + " action: " + self.AR[action] + " 15"
-                        reward = self.RC
-                    elif (self.state == 22):
-                        s = str(self.state)
-                        sampleList = [self.state, self.state - 1, 8] # con probabilità p < 1 il salto di stato, se no rimango dove sono 
-                        self.state = choice(sampleList, 1, p = [(1 - (self.pm)), self.pm/2, self.pm/2])[0]
-                        info = "mi muovo da " + s + " a " + str(self.state) + " action: " + self.AR[action] + " 16"
-                        reward = self.RC
-                else:
-                    info = "non mi muovo da " + str(self.state) + " 17"
-                    reward = -1.2
+                    sampleList = [self.state, self.NT - 1, self.state + 1] # con probabilità p < 1 il salto di stato, se no rimango dove sono 
+                    self.state = choice(sampleList, 1, p = [(1 - (self.pm)), self.pm/2, self.pm/2])[0]
+                    info = "mi muovo da " + s + " a " + str(self.state) + " action: " + self.AR[action] + " 15"
+                    reward = self.RC
+                elif (self.state == 22):
+                    s = str(self.state)
+                    sampleList = [self.state, self.state - 1, 8] # con probabilità p < 1 il salto di stato, se no rimango dove sono 
+                    self.state = choice(sampleList, 1, p = [(1 - (self.pm)), self.pm/2, self.pm/2])[0]
+                    info = "mi muovo da " + s + " a " + str(self.state) + " action: " + self.AR[action] + " 16"
+                    reward = self.RC
+            else:
+                info = "non mi muovo da " + str(self.state) + " 17"
+                reward = -1.2
                 
 
         # check if done
