@@ -58,7 +58,7 @@ class AddictiveEnv_v2(gym.Env):
         # env_phase: 50-1000 safe -> addictive activated
         self.env_phase = 0 
         self.DINIT = 0
-        self.DDRUG = 5000
+        self.DDRUG = 200
         
         
     def get_iter(self):
@@ -133,6 +133,6 @@ class AddictiveEnv_v2(gym.Env):
         return self._get_obs(), {}
         
     def close(self):
-        pass 
+        pass
         
 
