@@ -33,7 +33,7 @@ class AddictiveEnv_v3(gym.Env):
         # env_phase: 0-50 safe -> addictive deactivated
         # env_phase: 50-1000 safe -> addictive activated
         self.env_phase = 0 
-        self.DINIT = 50
+        self.DINIT = 0
         self.DDRUG = 1000
         
         
@@ -50,12 +50,19 @@ class AddictiveEnv_v3(gym.Env):
         self.c = 2
         # 2-4 buoni risultati
         self.statistics = []    # [istante, arm]
+      
         
         self.current_arm = 0 # 0:4 1:2
-        self.non_addictive_reward = -0.5
+        self.non_addictive_reward = -20
         ##################################
 
+    def get_rewards(self):
+        return self.reward_action
+    def get_arms(self):
+        return self.current_arm
+        
     def get_statistics(self):
+        # return [self.statistics, self.statistics2, self.statistics3]
         return self.statistics
             
     def get_iter(self):
@@ -151,7 +158,8 @@ class AddictiveEnv_v3(gym.Env):
             terminated = False
             self.env_phase += 1  
 
-        
+        # self.statistics2.append(self.reward_action[1])
+        # self.statistics3.append(self.reward_action[0])
         self.statistics.append(self.current_arm)
         return self._get_obs(), reward, terminated, False, {}
 
