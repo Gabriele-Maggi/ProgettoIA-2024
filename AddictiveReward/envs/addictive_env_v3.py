@@ -33,14 +33,14 @@ class AddictiveEnv_v3(gym.Env):
         # env_phase: 0-50 safe -> addictive deactivated
         # env_phase: 50-1000 safe -> addictive activated
         self.env_phase = 0 
-        self.DINIT = 0
+        self.DINIT = 50
         self.DDRUG = 1000
         
         
 
         ############ Bandit ##############
         self.arms = 2
-        self.epsilon = 0.1      
+        self.epsilon = 0.1
         self.number_action = np.ones(self.arms)
         self.reward_action = np.ones(self.arms)
         self.q_bandit = np.zeros(self.arms)
@@ -49,7 +49,7 @@ class AddictiveEnv_v3(gym.Env):
         
         self.c = 2
         # 2-4 buoni risultati
-        self.statistics = np.zeros((self.DINIT+self.DDRUG + 1))    # [istante, arm]
+        self.statistics = []    # [istante, arm]
         
         self.current_arm = 0 # 0:4 1:2
         self.non_addictive_reward = -0.5
@@ -74,22 +74,24 @@ class AddictiveEnv_v3(gym.Env):
         temp = np.zeros(self.arms)
         for ar in range(self.arms):
             temp[ar] = (self.q_bandit[ar] + (self.c * math.sqrt(math.log(self.t) / self.number_action[ar] )))
-        #print(f"{temp}")    
+        #print(f"{temp}") 
+       
         new_arm = np.argmax(temp)
+            
         if self.current_arm != new_arm:
             self.t += 1
-        
         self.current_arm = new_arm
         
         if random.uniform(0, 1) < self.epsilon: # epsilon greedy 
-             self.current_arm = random.randint(0, 1)
+            self.current_arm = random.randint(0, 1)
+        
 
         
                         
         
     def step(self, action):
         
-        self.statistics[self.env_phase] = self.current_arm
+        
         
         if (self.env_phase < self.DINIT):
             self.action_space = spaces.Discrete(self.numero_azioni - 1)
@@ -118,6 +120,7 @@ class AddictiveEnv_v3(gym.Env):
                     self._calculate_action()
             
             elif action == 4:
+                
                 self.reward_action[self.current_arm] += 1
                 self.number_action[self.current_arm] += 1
                 self._calculate_action()
@@ -147,7 +150,9 @@ class AddictiveEnv_v3(gym.Env):
         else:
             terminated = False
             self.env_phase += 1  
+
         
+        self.statistics.append(self.current_arm)
         return self._get_obs(), reward, terminated, False, {}
 
     
@@ -155,6 +160,7 @@ class AddictiveEnv_v3(gym.Env):
         pass
 
     def reset_bandit(self):
+        self.statistics = []
         self.t = 1 
         self.current_arm = 0 # 0:4 1:2
         self.number_action = np.ones(self.arms)
@@ -164,7 +170,7 @@ class AddictiveEnv_v3(gym.Env):
     def reset(self, seed: Optional[int] = None, options: Optional[dict] = None):
         
         super().reset(seed=seed)
-      
+        self.reset_bandit()
         self.state = self.S0
         self.env_phase = 0 
         
