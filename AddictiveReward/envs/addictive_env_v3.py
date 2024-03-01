@@ -34,28 +34,34 @@ class AddictiveEnv_v3(gym.Env):
         # env_phase: 50-1000 safe -> addictive activated
         self.env_phase = 0 
         self.DINIT = 0
-        self.DDRUG = 1000
+        self.DDRUG = 10000
         
         
 
         ############ Bandit ##############
+        self.epsilon = 0     
+        self.c = 1.2
+        self.non_addictive_reward = 2
+        
+        ###
         self.arms = 2
-        self.epsilon = 0.1
+        
         self.number_action = np.ones(self.arms)
         self.reward_action = np.ones(self.arms)
         self.q_bandit = np.zeros(self.arms)
         
         self.t = 1 # aggiornato a ogni azione presa da agent
-        
-        self.c = 2
+
         # 2-4 buoni risultati
         self.statistics = []    # [istante, arm]
       
         
         self.current_arm = 0 # 0:4 1:2
-        self.non_addictive_reward = -20
-        ##################################
 
+        ##################################
+    def set_reward(self, reward):
+        self.non_addictive_reward = reward
+        
     def get_rewards(self):
         return self.reward_action
     def get_arms(self):
