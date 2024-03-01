@@ -9,30 +9,6 @@ import matplotlib.pyplot as plt
 from typing import Optional
 
 
-# from numba import njit, gdb_init
-# from numba import uint32, int32, int32, b1, float64, float32
-# from numba.experimental import jitclass
-
-# spec = [
-#     ("numero_stati", int32),
-#     ("numero_azioni", int32),
-#     ("S0", int32),
-#     ("reward_healty", int32),
-#     ("reward_addicted", int32),
-#     ("reward_penality", int32),
-#     ("C_penality", int32),
-    
-#     ("p", int32),
-    # ("env_phase", int32),
-#   ("DINIT", int32),
-#    ("DDRUG", int32),
-    
-#    ("reward_penality", int32),
-#]
-
-
-#@jitclass(spec)
-
 class AddictiveEnv_v2(gym.Env):
     def __init__(self):
         
@@ -75,20 +51,7 @@ class AddictiveEnv_v2(gym.Env):
             self.action_space = spaces.Discrete(self.numero_azioni)
             
         reward = 0
-        # if (self.env_phase < self.DINIT):
-        #     if self.state == 1:
-        #         if action == 2:
-        #             self.state = self.S0
-        #             reward = self.reward_healty
-        #     elif self.state == 2:    
-        #         if action == 2:
-        #             self.state = 1
-        #         elif action == 1:
-        #             self.state = 3
-        #     elif self.state == 3:
-        #         if action == 0:
-        #             self.state = 2
-        # else:
+
         if self.state == 1:
             if action == 2:
                 self.state = self.S0
@@ -134,5 +97,20 @@ class AddictiveEnv_v2(gym.Env):
         
     def close(self):
         pass
-        
 
+    def set_reward(self, reward):
+        pass
+          
+        
+    def get_rewards(self):
+        pass
+    
+    def get_arms(self):
+        pass
+        
+    def get_statistics(self):
+        pass
+           
+    def get_iter(self):
+       pass
+        

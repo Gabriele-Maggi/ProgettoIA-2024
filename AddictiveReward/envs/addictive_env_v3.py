@@ -122,6 +122,7 @@ class AddictiveEnv_v3(gym.Env):
                 self.state = 3
         
         elif self.state == 3:
+            
             if action == 0:
                 self.state = 2
                 

@@ -165,4 +165,19 @@ class AddictiveEnv_v1(gym.Env):
     def close(self):
         pass 
         
-
+    def set_reward(self, reward):
+        pass
+          
+        
+    def get_rewards(self):
+        pass
+    
+    def get_arms(self):
+        pass
+        
+    def get_statistics(self):
+        pass
+           
+    def get_iter(self):
+       pass
+        
