@@ -20,11 +20,12 @@ class AddictiveEnv_v1(gym.Env):
         self.RDD = 10  # Reward at entering Addictive reward state
         self.RG = 1    # Reward 
         
-        self.DINIT = 50  # Duration safe phase
-        self.DDRUG = 10000
+        self.DINIT = 5 # Duration safe phase
+        self.DDRUG = 950
 
-        self.pmm = 0.2
-        self.pm = 0.6
+        self.pmm = 0.4
+        self.pm = 0.8
+        
         ## ACTIONS
         #as2-7 -> 0-5
         self.AG = 6
@@ -105,7 +106,10 @@ class AddictiveEnv_v1(gym.Env):
                 sampleList = [self.state, self.S0] # con probabilità p << 1 il salto di stato, se no rimango dove sono 
                 self.state = choice(sampleList, 1, p = [(1-self.pmm), self.pmm])[0]
                 info = "mi muovo da " + s + " a " + str(self.state) + " action: " + self.AR[action] + " 12"
-                reward = self.RP
+                if(self.state == self.S0):
+                    reward = self.RP
+                else:
+                    reward = self.RC
                 
             elif (self.state == 15 and action == self.AW):
                 s = str(self.state)
@@ -161,4 +165,17 @@ class AddictiveEnv_v1(gym.Env):
     def close(self):
         pass 
         
-
+    def set_reward(self, reward):
+        pass
+        
+    def get_rewards(self):
+        pass
+    
+    def get_arms(self):
+        pass
+        
+    def get_statistics(self):
+        pass
+           
+    def get_iter(self):
+        return self.DINIT + self.DDRUG
