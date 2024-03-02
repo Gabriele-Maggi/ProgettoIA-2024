@@ -40,10 +40,10 @@ class AddictiveEnv_v3(gym.Env):
         # 50-1000 safe -> addictive activated
         self.env_phase = 0 
         self.DINIT = 0
-        self.DDRUG = 1000
+        self.DDRUG = 5000
 
         # Bandit parameters
-        self.epsilon = 0     
+        self.epsilon = 0.10   
         self.c = 1
         self.non_addictive_reward = -1
         
