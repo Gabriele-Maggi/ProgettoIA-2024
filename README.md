@@ -1,0 +1,11 @@
+## ABSTRACT
+Questo studio si propone di replicare l'ambiente e gli agenti descritti nel paper ["Addiction beyond pharmacological effects: The role of environment complexity and bounded rationality"](https://www.sciencedirect.com/science/article/abs/pii/S0893608019301285) al fine di validare e comprendere più approfonditamente i risultati ottenuti nell'ambito del Reinforcement Learning. Il paper presenta un ambiente di simulazione e una serie di agenti intelligenti che operano all'interno di esso. L'obiettivo principale della nostra ricerca è quello di ricostruire fedelmente l'ambiente di simulazione e implementare gli agenti descritti utilizzando una libreria standard di Reinforcement Learning, come OpenAI Gym. 
+Attraverso la ricreazione di questo ambiente e l'implementazione degli agenti, intendiamo esplorare le dinamiche sottostanti del problema descritto, testare le strategie di apprendimento automatico proposte e confrontare i risultati con quelli riportati nel paper originale. La nostra riproduzione dell'ambiente e degli agenti fornirà una base solida per ulteriori ricerche nel campo dell'apprendimento automatico e dell'intelligenza artificiale, consentendo una migliore comprensione e validazione dei risultati riportati nel paper.
+
+### Recommender
+Dopo aver riprodotto l'ambiente l'obiettivo è di implementare un multi armed bandit (UCB) e mostrare al variare del reward connesso all'arm B i diversi comportamenti. Fintantoché l’utente sceglie l’azione addictive ogni volta che può (perchè è nelle prime fasi dell’apprendimento o perchè ha risorse computazionali limitate), il recommender dovrebbe imparare a proporre lo stato A. Se e quando l’utente impara ad evitare l’azione addictive, il recommender dovrebbe imparare a scegliere B. 
+
+**N.B.** non è detto che questo sistema a due agenti sia stabile, e non è detto che gli algoritmi utilizzati riescano a gestire la non stazionarietà. Per questi motivi, si consiglia di usare learning rate piccoli.
+
+### Premessa
+A causa della stocasticità del sistema, i risultati possono molto variare. L'agente MB ha problemi di esplorazione, quindi per colpa di questo, nei test su reward dell'arm B si è scelto di utilizzare solo l'agente MF che risulta più stabile, ma si possono utilizzare altri agenti MB e MX.
