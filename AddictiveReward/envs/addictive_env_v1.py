@@ -167,7 +167,6 @@ class AddictiveEnv_v1(gym.Env):
         
     def set_reward(self, reward):
         pass
-          
         
     def get_rewards(self):
         pass
@@ -179,5 +178,4 @@ class AddictiveEnv_v1(gym.Env):
         pass
            
     def get_iter(self):
-       pass
-        
+        return self.DINIT + self.DDRUG

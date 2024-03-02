@@ -112,5 +112,4 @@ class AddictiveEnv_v2(gym.Env):
         pass
            
     def get_iter(self):
-       pass
-        
+        return self.DINIT + self.DDRUG
